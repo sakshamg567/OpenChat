@@ -2,20 +2,22 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { UIMessage } from "ai";
 
-interface Message {
-   id: string,
+export interface Message {
    threadId: string,
-   parts: UIMessage["parts"];
-   content: string,
-   role: 'user' | 'assistant' | 'system' | 'data';
-   createdAt: Date;
+   message: {
+      id: string,
+      parts: UIMessage["parts"];
+      content: string,
+      role: 'user' | 'assistant' | 'system' | 'data';
+      createdAt: number;
+   }
 }
 
-interface Thread {
-   id: string,
+export interface Thread {
+   threadId: string,
    title: string,
-   createdAt: Date,
-   updatedAt: Date
+   createdAt: number,
+   updatedAt: number
 }
 
 export default defineSchema({
@@ -23,20 +25,22 @@ export default defineSchema({
       threadId: v.string(),
       title: v.string(),
       createdAt: v.number(),
-      updatedAt: v.number()
-   }),
+      updatedAt: v.number(),
+   }).index("by_updated", ["updatedAt"]),
    messages: defineTable({
-      msgId: v.string(),
       threadId: v.string(),
-      role: v.union(
-         v.literal("user"),
-         v.literal("assistant"),
-         v.literal("system"),
-         v.literal("data")
-      ),
-      parts: v.any(),
-      content: v.string(),
-      createdAt: v.number(),
+      message: v.object({
+         id: v.string(),
+         role: v.union(
+            v.literal("user"),
+            v.literal("assistant"),
+            v.literal("system"),
+            v.literal("data")
+         ),
+         parts: v.any(),
+         content: v.string(),
+         createdAt: v.number(),
+      })
    }).index("by_thread", ["threadId"])
-      .index("by_thread_created", ["threadId", "createdAt"])
+      .index("by_thread_created", ["threadId", "message.createdAt"])
 })
