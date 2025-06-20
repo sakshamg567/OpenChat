@@ -9,9 +9,6 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  experimental: {
-    reactCompiler: true
-  },
   webpack: (config) => {
     config.module.rules.push({
       test: /\.(md|MD|LICENSE|node|d\.ts)$/,
