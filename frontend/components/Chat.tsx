@@ -11,11 +11,13 @@ import { SidebarInset, SidebarTrigger, useSidebar } from './ui/sidebar';
 import { Button } from './ui/button';
 import { Plus } from 'lucide-react';
 import Messages from './Messages';
-import { useMutation } from 'convex/react';
+import { useMutation, useQuery } from 'convex/react';
 import { api } from '@/convex/_generated/api';
-import { useNavigate } from 'react-router';
-import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router';
+import { useState, useEffect, use } from 'react';
 import { ScrollToBottom } from './ScrollToBottom';
+import { useTitle } from 'react-haiku';
+import { useUserId } from '@/hooks/useUserId';
 // import { useChatNavigator } from '@/frontend/hooks/useChatNavigator';
 
 interface ChatProps {
@@ -24,11 +26,16 @@ interface ChatProps {
 }
 
 export default function Chat({ threadId, initialMessages }: ChatProps) {
-   console.log("chat component thread id : ", threadId);
    const { getKey } = useAPIKeyStore();
    const selectedModel = useModelStore((state) => state.selectedModel);
    const modelConfig = useModelStore((state) => state.getModelConfig());
    const webSearchEnabled = useCapabilityStore((state) => state.webSearchEnabled);
+
+   const thread = useQuery(api.queries.getThreadsById, { threadId });
+
+   useTitle(thread?.title ? `${thread.title} - OpenChat` : 'OpenChat')
+
+   const userId = useUserId();
 
    // const {
    // isNavigatorVisible,
@@ -79,14 +86,13 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
       },
       body: {
          model: selectedModel,
-         useWebSearch: webSearchEnabled
+         useWebSearch: webSearchEnabled,
       },
    });
 
    return (
       <SidebarInset className='border border-border border-r-0 border-b-0 flex flex-col h-screen overflow-hidden mt-2 rounded-tr-none rounded-md relative'>
          <ChatSidebarTrigger />
-
          {/* Messages container - full height with padding for floating input */}
          <div className="flex-1 overflow-y-auto overflow-x-hidden" data-scroll-container>
             <div className="w-full max-w-3xl mx-auto px-4 pt-10 pb-56">
@@ -112,8 +118,8 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
                   append={append}
                   setInput={setInput}
                   stop={stop}
+                  userId={userId as string}
                />
-
             </div>
          </div>
 
@@ -126,9 +132,10 @@ export default function Chat({ threadId, initialMessages }: ChatProps) {
 const ChatSidebarTrigger = () => {
    const { state } = useSidebar();
    const [isAnimated, setIsAnimated] = useState(false);
-
+   const location = useLocation();
    const navigate = useNavigate();
 
+   const isOnBaseChatRoute = location.pathname === '/chat';
 
    useEffect(() => {
       if (state === 'collapsed') {
@@ -159,8 +166,11 @@ const ChatSidebarTrigger = () => {
                   : 'translate-x-[-100%] opacity-0'
                   }`}
                onClick={() => {
-                  navigate("/");
+                  if (!isOnBaseChatRoute) {
+                     navigate("/");
+                  }
                }}
+               disabled={isOnBaseChatRoute}
             >
                <Plus className={`transition-transform duration-500 ease-in-out`} />
                <span className="sr-only">New Chat</span>

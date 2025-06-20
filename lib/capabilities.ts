@@ -21,7 +21,7 @@ export const CAPABILITY_META: Record<Capability, CapabilityMeta> = {
       label: 'Web Search',
       description: 'Uses Search to Access information',
       icon: Globe,
-      color: 'text-pink-text',
+      color: '#98bfe2',
       category: 'input',
    },
    file_attachment: {
@@ -29,7 +29,7 @@ export const CAPABILITY_META: Record<Capability, CapabilityMeta> = {
       label: 'File Upload',
       description: 'Supports PDF uploads and analysis',
       icon: PaperclipIcon,
-      color: 'text-pink-text',
+      color: '#6e6ea8',
       category: 'input',
    },
    vision: {
@@ -37,7 +37,7 @@ export const CAPABILITY_META: Record<Capability, CapabilityMeta> = {
       label: 'Vision',
       description: 'Supports Image uploads and analysis',
       icon: EyeIcon,
-      color: 'text-pink-text',
+      color: '#90d3c6',
       category: 'input',
    },
    reasoning: {
@@ -45,7 +45,7 @@ export const CAPABILITY_META: Record<Capability, CapabilityMeta> = {
       label: 'Advanced Reasoning',
       description: 'Has reasoning capabilities',
       icon: BrainIcon,
-      color: 'text-pink-text',
+      color: '#b79ae4',
       category: 'processing',
    },
 };

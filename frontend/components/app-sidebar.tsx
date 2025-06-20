@@ -13,12 +13,12 @@ import { Button, buttonVariants } from './ui/button';
 import { Link, NavigateFunction, useNavigate, useParams } from 'react-router';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useQuery, useMutation } from 'convex/react';
 import { api } from '@/convex/_generated/api';
 import Component from './comp-01';
 import { type Thread } from '@/convex/schema';
-
+import { useUserId } from '@/hooks/useUserId';
 function getStartofDayTimestamp(date: Date) {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
@@ -27,12 +27,14 @@ function getStartofDayTimestamp(date: Date) {
 
 export default function AppSidebar() {
   const { id } = useParams();
+  const userId = useUserId();
   const navigate = useNavigate();
-  const threads = useQuery(api.queries.getThreads) || [];
+  const threadsData = useQuery(api.queries.getThreads, userId ? { userId: userId } : 'skip');
+  const threads = useMemo(() => threadsData || [], [threadsData]);
 
   const todayTimestamp = getStartofDayTimestamp(new Date());
   const lastWeek = new Date();
-  lastWeek.setDate(lastWeek.getDate() - 1);
+  lastWeek.setDate(lastWeek.getDate() - 7);
   const lastweekTimestamp = getStartofDayTimestamp(lastWeek);
   const lastMonth = new Date();
   lastMonth.setDate(lastMonth.getDate() - 30);
@@ -44,6 +46,11 @@ export default function AppSidebar() {
   const olderThreads: Thread[] = [];
 
   const [currThreads, setCurrThreads] = useState<Thread[]>(threads);
+
+  useEffect(() => {
+    setCurrThreads(threads);
+  }, [threads])
+
 
   currThreads.map((thread) => {
     const threadTimestamp = thread.createdAt;
@@ -99,7 +106,7 @@ export default function AppSidebar() {
                 )}
                 {lastMonthThreads.length > 0 && (
                   <>
-                    <label className='p-1 font-semibold text-pink-text'>Last 7 Days</label>
+                    <label className='p-1 font-semibold text-pink-text'>Last 30 Days</label>
                     <ThreadDisplay
                       threads={lastMonthThreads}
                       navigate={navigate}
@@ -109,7 +116,7 @@ export default function AppSidebar() {
                 )}
                 {olderThreads.length > 0 && (
                   <>
-                    <label className='p-1 font-semibold text-pink-text'>Last 7 Days</label>
+                    <label className='p-1 font-semibold text-pink-text'>Older</label>
                     <ThreadDisplay
                       threads={olderThreads}
                       navigate={navigate}

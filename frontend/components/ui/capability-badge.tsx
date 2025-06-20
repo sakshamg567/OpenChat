@@ -25,15 +25,18 @@ export function CapabilityBadge({
 
    const badge = (
       <Badge
-         variant="outline"
+         variant="default"
          className={cn(
+            "scale-110",
             "gap-1.5 whitespace-nowrap",
-            size === 'sm' && "text-xs px-1.5 py-0.5",
+            size === 'sm' && "text-xs px-1 py-1",
             className
          )}
+         style={{
+            backgroundColor: `${meta.color}20`
+         }}
       >
-         {showIcon && <Icon className={cn("size-3", meta.color)} />}
-         <span>{meta.label}</span>
+         {showIcon && <Icon className={cn("size-3", `text-[${meta.color}]`)} />}
       </Badge>
    );
 
@@ -79,7 +82,7 @@ export function CapabilityList({
    const hidden = capabilities.slice(maxVisible);
 
    return (
-      <div className={cn("flex flex-wrap gap-1", className)}>
+      <div className={cn("flex flex-wrap gap-2", className)}>
          {visible.map((capability) => (
             <CapabilityBadge
                key={capability}
