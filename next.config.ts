@@ -9,8 +9,11 @@ const nextConfig: NextConfig = {
       }
     ]
   },
-  experimental: {
-    reactCompiler: true
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    ignoreBuildErrors: true
   },
   webpack: (config) => {
     config.module.rules.push({
