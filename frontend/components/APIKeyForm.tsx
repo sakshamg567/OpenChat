@@ -42,7 +42,10 @@ export default function Settings() {
    const [activeTab, setActiveTab] = useState('api-keys');
 
    return (
-      <div className="min-h-screen bg-sidebar">
+      <div className="min-h-screen"
+         style={{
+            background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(236, 72, 153, 0.25), transparent 70%), #000000",
+         }}>
          {/* Header */}
          <div className="sticky top-0 z-50 w-full backdrop-blur-2xl">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
