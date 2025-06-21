@@ -1,5 +1,5 @@
-import { ChevronDown, Check, ArrowUpIcon } from 'lucide-react';
-import { Dispatch, memo, SetStateAction, useCallback, useMemo } from 'react';
+import { ChevronDown, Check, ArrowUpIcon, Globe, Paperclip, Brain } from 'lucide-react';
+import { Dispatch, memo, SetStateAction, useCallback, useMemo, useRef, useState } from 'react';
 import { Textarea } from '@/frontend/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { Button } from '@/frontend/components/ui/button';
@@ -27,10 +27,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { StopIcon } from './ui/icons';
 import { useMessageSummary } from '../hooks/useMessageSummary';
 import { CapabilityList } from './ui/capability-badge';
-import { WebSearchToggle } from './ui/webSearchToggle';
 import { useCapabilityStore } from '@/frontend/stores/CapabilityStore';
+import CapabilityToggle from './ui/CapabilityToggler';
 
 interface ChatInputProps {
+   userId: string;
    threadId: string;
    input: UseChatHelpers['input'];
    status: UseChatHelpers['status'];
@@ -58,6 +59,7 @@ const createUserMessage = (id: string, text: string): UIMessage => ({
 });
 
 function PureChatInput({
+   userId,
    threadId,
    input,
    status,
@@ -74,6 +76,8 @@ function PureChatInput({
    });
    const { selectedModel } = useModelStore();
    const supportsWebSearch = hasCapability(selectedModel, 'web_search');
+   const supportFileAttach = hasCapability(selectedModel, 'file_attachment');
+   const supportsThinking = hasCapability(selectedModel, 'reasoning');
 
    const navigate = useNavigate();
    const { id } = useParams();
@@ -103,7 +107,7 @@ function PureChatInput({
 
       if (!id) {
          navigate(`/chat/${threadId}`);
-         await createThreadMutation({ id: threadId });
+         await createThreadMutation({ threadId: threadId, userId: userId });
          complete(currentInput.trim(), {
             body: { threadId, messageId, isTitle: true },
          });
@@ -150,6 +154,8 @@ function PureChatInput({
 
    const webSearchEnabled = useCapabilityStore((state) => state.webSearchEnabled);
    const toggleWebSearch = useCapabilityStore((state) => state.toggleWebSearch);
+   const reasoningEnabled = useCapabilityStore((state) => state.isReasoningEnabled);
+   const toggleReasoning = useCapabilityStore((state) => state.toggleReasoningEnabled);
 
    return (
       <div className='absolute bottom-0 left-0 right-0 flex justify-center px-4'>
@@ -185,12 +191,31 @@ function PureChatInput({
                      </div>
                      <div className="h-14 flex items-center px-2">
                         <div className="flex items-center justify-between w-full">
-                           <div className='flex flex-row gap-5'>
+                           <div className='flex flex-row'>
                               <ChatModelDropdown />
-                              {supportsWebSearch && (<WebSearchToggle
+                              {supportsWebSearch && (<CapabilityToggle
                                  enabled={webSearchEnabled}
                                  onToggle={toggleWebSearch}
+                                 labelText='Search'
+                                 Icon={Globe}
                               />)}
+                              {/* {supportFileAttach && (
+                                 <CapabilityToggle
+                                    Icon={Paperclip}
+                                    enabled={webSearchEnabled}
+                                    onToggle={toggleWebSearch}
+                                    type='file'
+                                    multiple
+                                    accept='image/* text/*' />
+                              )} */}
+                              {supportsThinking && (
+                                 <CapabilityToggle
+                                    Icon={Brain}
+                                    enabled={reasoningEnabled}
+                                    onToggle={toggleReasoning}
+                                    labelText='Reason'
+                                 />
+                              )}
                            </div>
                            {status === 'submitted' || status === 'streaming' ? (
                               <StopButton stop={stop} />
@@ -235,14 +260,14 @@ const PureChatModelDropdown = () => {
                   className="flex items-center gap-1 h-8 pl-2 pr-2 text-xs rounded-md text-foreground hover:bg-primary/10 focus-visible:ring-1 focus-visible:ring-offset-0 focus-visible:ring-blue-500"
                   aria-label={`Selected model: ${selectedModel}`}
                >
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 text-sidebar-foreground">
                      {selectedModel}
                      <ChevronDown className="w-3 h-3 opacity-50" />
                   </div>
                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-               className={cn('min-w-[10rem]', 'border-border', 'bg-popover')}
+               className={cn('min-w-[10rem]', 'border-border', 'bg-sidebar')}
             >
                {AI_MODELS.map((model) => {
                   const isEnabled = isModelEnabled(model);
@@ -253,7 +278,7 @@ const PureChatModelDropdown = () => {
                         onSelect={() => isEnabled && setModel(model)}
                         disabled={!isEnabled}
                         className={cn(
-                           'flex items-center justify-between gap-2',
+                           'flex items-center justify-between gap-10',
                            'cursor-pointer'
                         )}
                      >

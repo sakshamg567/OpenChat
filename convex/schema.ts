@@ -14,6 +14,7 @@ export interface Message {
 }
 
 export interface Thread {
+   userId: string
    threadId: string,
    title: string,
    createdAt: number,
@@ -22,11 +23,13 @@ export interface Thread {
 
 export default defineSchema({
    threads: defineTable({
+      userId: v.string(),
       threadId: v.string(),
       title: v.string(),
       createdAt: v.number(),
       updatedAt: v.number(),
-   }).index("by_updated", ["updatedAt"]),
+   }).index("by_updated", ["updatedAt"])
+      .index("by_userid", ["userId"]),
    messages: defineTable({
       threadId: v.string(),
       message: v.object({

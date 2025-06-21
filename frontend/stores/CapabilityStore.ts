@@ -10,6 +10,10 @@ interface CapabilityState {
    imageGenerationEnabled: boolean;
    setImageGenerationEnabled: (enabled: boolean) => void;
    toggleImageGeneration: () => void;
+
+   isReasoningEnabled: boolean;
+   setIsReasoningEnabled: (enabled: boolean) => void;
+   toggleReasoningEnabled: () => void;
 }
 
 export const useCapabilityStore = create<CapabilityState>()(
@@ -22,6 +26,9 @@ export const useCapabilityStore = create<CapabilityState>()(
          imageGenerationEnabled: false,
          setImageGenerationEnabled: (enabled: boolean) => set({ imageGenerationEnabled: enabled }),
          toggleImageGeneration: () => set((state) => ({ imageGenerationEnabled: !state.imageGenerationEnabled })),
+
+         isReasoningEnabled: false,
+         setIsReasoningEnabled: (enabled: boolean) => set({ isReasoningEnabled: enabled }), toggleReasoningEnabled: () => set((state) => ({ isReasoningEnabled: !state.isReasoningEnabled }))
       }),
       {
          name: 'capability-store',

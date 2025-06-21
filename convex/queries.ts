@@ -3,23 +3,41 @@ import { mutation, query } from "./_generated/server";
 
 
 export const getThreads = query({
-   handler: async (ctx) => {
+   args: {
+      userId: v.string()
+   },
+   handler: async (ctx, args) => {
       return await ctx.db
          .query("threads")
-         .withIndex("by_updated")
+         .withIndex("by_userid", (q) => q.eq("userId", args.userId))
          .order("desc")
          .collect();
    }
 })
 
+export const getThreadsById = query({
+   args: {
+      threadId: v.string()
+   },
+   handler: async (ctx, args) => {
+      return await ctx.db
+         .query("threads")
+         .withIndex("by_id").
+         filter((q) => q.eq(q.field('threadId'), args.threadId))
+         .first()
+   }
+})
+
 export const createThread = mutation({
    args: {
-      id: v.string()
+      threadId: v.string(),
+      userId: v.string()
    },
    handler: async (ctx, args) => {
       const now = Date.now();
       return await ctx.db.insert("threads", {
-         threadId: args.id,
+         userId: args.userId,
+         threadId: args.threadId,
          title: 'New Chat',
          createdAt: now,
          updatedAt: now,
